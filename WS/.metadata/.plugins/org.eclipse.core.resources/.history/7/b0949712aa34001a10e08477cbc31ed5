@@ -1,0 +1,269 @@
+package ie.gmit.sw;
+
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Scanner;
+import java.io.ObjectInputStream;
+
+import java.net.*;
+
+
+//Start Of Client
+public class Client {
+
+	private String clubName;
+	private String clubId;
+	private String clubEmail;
+	private Socket connection;
+	private String email;
+	private Scanner console;
+	private String ipAddress;
+	private int portAddress;
+	private ObjectOutputStream out;
+	private ObjectInputStream in;
+	private double availableFunds;
+	private String agentName;
+	private String agentId;
+	private String agentEmail;
+	private String userCategory;
+	private String loginOrRegistration;
+	private boolean userLoggedIn = false;
+	private int choice;
+
+	public Client() {
+		console = new Scanner(System.in);
+
+		System.out.println("Enter the IP Address of the server");
+		ipAddress = console.nextLine();
+
+		System.out.println("Enter the TCP Port");
+		portAddress = console.nextInt();
+
+	}
+
+	public void sendEmail(String send) {
+		try {
+			out.writeObject(send);
+			out.flush();
+			System.out.println("client>" + send);
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	} // end of sendMessage(String)
+
+	public void sendEmail(Double f) {
+		try {
+			out.writeObject(f);
+			out.flush();
+			System.out.println("client>" + f);
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		}
+	} // end of sendMessage(Double)
+
+	public static void main(String[] args) {
+		Client temp = new Client();
+		temp.clientapp();
+	} // end of main()
+
+	public void clientapp() {
+
+		try {
+			connection = new Socket(ipAddress, portAddress);
+
+			out = new ObjectOutputStream(connection.getOutputStream());
+			out.flush();
+			in = new ObjectInputStream(connection.getInputStream());
+			System.out.println("Client Side ready to communicate");
+
+			/// Client App.
+			email = (String) in.readObject();
+			System.out.println(email);
+			loginOrRegistration = log();
+			sendEmail(loginOrRegistration);
+
+			// Login
+			if (email.equalsIgnoreCase("a")) {
+				email = (String) in.readObject();
+				System.out.println(email);
+				userCategory = clubOrAgent();
+
+				sendEmail(userCategory);
+				login(userCategory);
+
+			}
+
+			// Register
+			else if (email.equalsIgnoreCase("b")) {
+				email = (String) in.readObject();
+				System.out.println(email);
+				userCategory = clubOrAgent();
+				sendEmail(userCategory);
+
+				register(userCategory);
+
+			}
+
+			email = (String) in.readObject();
+			System.out.println(email);
+
+			// Club
+			if (userCategory.equalsIgnoreCase("a")) {
+				// is a Club
+			}
+			// Agent
+			else if (userCategory.equalsIgnoreCase("b")) {
+				agentMenu();
+
+				choice = (int) in.readObject();
+				System.out.println("Option selected = " + choice);
+
+				email = (String) in.readObject();
+				System.out.println(email);
+			}
+
+			out.close();
+			in.close();
+			connection.close();
+		}
+
+		catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+	} // end of clientApp()
+
+	public String log() {
+		String choice;
+
+		do {
+			choice = console.next();
+		} while (!choice.equalsIgnoreCase("1") && !choice.equalsIgnoreCase("2"));
+
+		return choice;
+	} // end of loginOrReg()
+
+	public String clubOrAgent() {
+		String choice = "a";
+		while (!choice.equalsIgnoreCase("a") && !choice.equalsIgnoreCase("b")) {
+			choice = console.next();
+		}
+
+		return choice;
+	} // end of clubOrAgent()
+
+	public void login(String user) throws ClassNotFoundException, IOException {
+		do {
+			if (user.equalsIgnoreCase("a")) {
+				email = (String) in.readObject();
+				System.out.println(email);
+				clubName = console.next();
+				sendEmail(clubName);
+
+				email = (String) in.readObject();
+				System.out.println(email);
+				agentId = console.next();
+				sendEmail(agentId);
+			} else if (user.equalsIgnoreCase("b")) {
+				email = (String) in.readObject(); // agent name
+				System.out.println(email);
+				agentName = console.next();
+				sendEmail(agentName);
+
+				email = (String) in.readObject(); // agent id
+				System.out.println(email);
+				agentId = console.next();
+				sendEmail(agentId);
+
+			}
+			userLoggedIn = (boolean) in.readObject();
+			System.out.println(userLoggedIn + " is logged in");
+
+		} while (userLoggedIn = false);
+
+	} // end of login()
+
+	public void register(String user) throws ClassNotFoundException, IOException {
+
+		boolean userRegstd = true;
+
+		do {
+			if (user.equals("1")) { // club
+				registerClub();
+			} else if (user.equals("2")) {
+				registerAgent();
+			}
+
+			userRegstd = (boolean) in.readObject();
+			System.out.println(userRegstd);
+
+			if (userRegstd == false) {
+				email = (String) in.readObject();
+				System.out.println(email);
+			}
+		} while (userRegstd == false);
+
+		email = (String) in.readObject();
+		System.out.println(email);
+
+		email = (String) in.readObject();
+		System.out.println(email);
+
+		login(user);
+	} // end of register()
+
+	public void registerClub() throws ClassNotFoundException, IOException {
+		email = (String) in.readObject();
+		System.out.println(email);
+		clubName = console.next();
+		sendEmail(clubName);
+
+		email = (String) in.readObject();
+		System.out.println(email);
+		clubId = console.next();
+		sendEmail(clubId);
+
+		email = (String) in.readObject();
+		System.out.println(email);
+		clubEmail = console.next();
+		sendEmail(clubEmail);
+
+		email = (String) in.readObject();
+		System.out.println(email);
+		availableFunds = console.nextDouble();
+		sendEmail(availableFunds);
+	} // end of registerClub()
+
+	public void registerAgent() throws ClassNotFoundException, IOException {
+		email = (String) in.readObject(); // club name
+		System.out.println(email);
+		clubName = console.next();
+		sendEmail(agentName);
+
+		email = (String) in.readObject(); // club id
+		System.out.println(email);
+		clubId = console.next();
+		sendEmail(agentId);
+
+		email = (String) in.readObject(); // club email
+		System.out.println(email);
+		clubEmail = console.next();
+		sendEmail(agentEmail);
+	} // end of registerAgent()
+
+	// Menu for agent
+	public void agentMenu() throws ClassNotFoundException, IOException {
+		String choice = "";
+		email = (String) in.readObject();
+		System.out.println(email);
+
+		while (!choice.equalsIgnoreCase("a") || !choice.equalsIgnoreCase("b")) {
+			choice = console.next();
+		}
+
+		sendEmail(choice);
+	} // end of agentMenu()
+
+} // end of Client class

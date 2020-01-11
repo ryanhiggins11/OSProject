@@ -1,0 +1,36 @@
+package ie.gmit.sw;
+
+public class Agent {
+	//	Variable declaration
+	private String name;
+	private String iD;
+	private String email;
+	
+	//	Constructor
+	public Agent(String name, String iD, String email) {
+		super();
+		this.name = name;
+		this.iD = iD;
+		this.email = email;
+	}
+	
+	//	Getters and setters
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getID() {
+		return iD;
+	}
+	public void setID(String iD) {
+		this.iD = iD;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}	
+}
